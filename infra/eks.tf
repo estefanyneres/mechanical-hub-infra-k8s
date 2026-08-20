@@ -1,0 +1,37 @@
+resource "aws_eks_cluster" "cluster" {
+  name     = "eks-${var.projectName}"
+  role_arn = local.labRole
+  version  = "1.32"
+
+  access_config {
+    authentication_mode = "API"
+  }
+
+  vpc_config {
+    subnet_ids         = data.aws_subnets.public.ids
+    security_group_ids = [data.aws_security_group.app.id]
+  }
+
+  tags = var.tags
+}
+
+resource "aws_eks_node_group" "node_group" {
+  cluster_name    = aws_eks_cluster.cluster.name
+  node_group_name = "nodeg-${var.projectName}"
+  node_role_arn   = local.labRole
+  subnet_ids      = data.aws_subnets.public.ids
+  disk_size       = 50
+  instance_types  = [var.instance_type]
+
+  scaling_config {
+    min_size     = 2
+    desired_size = 2
+    max_size     = 5
+  }
+
+  update_config {
+    max_unavailable = 1
+  }
+
+  tags = var.tags
+}
