@@ -22,3 +22,10 @@ data "aws_security_group" "app" {
     values = ["${var.projectName}-app-sg"]
   }
 }
+
+data "aws_security_group" "rds" {
+  filter {
+    name   = "tag:Name"
+    values = ["${var.projectName}-rds-sg"]
+  }
+}
