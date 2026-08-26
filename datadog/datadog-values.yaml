@@ -16,4 +16,5 @@ datadog:
   logs:
     enabled: true
     containerCollectAll: true
+  containerExcludeLogs: "kube_namespace:datadog kube_namespace:kube-system"
 registry: "public.ecr.aws/datadog"
