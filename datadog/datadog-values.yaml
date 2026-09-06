@@ -17,4 +17,10 @@ datadog:
     enabled: true
     containerCollectAll: true
   containerExcludeLogs: "kube_namespace:datadog kube_namespace:kube-system"
+agents:
+  containers:
+    traceAgent:
+      env:
+        - name: DD_APM_IGNORE_RESOURCES
+          value: "GET /actuator/health"
 registry: "public.ecr.aws/datadog"
