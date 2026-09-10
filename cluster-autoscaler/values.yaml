@@ -1,0 +1,11 @@
+autoDiscovery:
+  clusterName: "eks-mechanical-hub"
+awsRegion: "us-east-1"
+cloudProvider: "aws"
+image:
+  tag: "v1.32.0"
+rbac:
+  create: true
+extraArgs:
+  balance-similar-node-groups: true
+  skip-nodes-with-system-pods: false
