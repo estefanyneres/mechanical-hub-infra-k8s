@@ -15,13 +15,39 @@ resource "aws_eks_cluster" "cluster" {
   tags = var.tags
 }
 
+resource "aws_launch_template" "node_group" {
+  name_prefix = "${var.projectName}-nodeg-"
+
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 2
+  }
+
+  block_device_mappings {
+    device_name = "/dev/xvda"
+
+    ebs {
+      volume_size = 50
+    }
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 resource "aws_eks_node_group" "node_group" {
   cluster_name    = aws_eks_cluster.cluster.name
   node_group_name = "nodeg-${var.projectName}"
   node_role_arn   = local.labRole
   subnet_ids      = data.aws_subnets.public.ids
-  disk_size       = 50
   instance_types  = [var.instance_type]
+
+  launch_template {
+    id      = aws_launch_template.node_group.id
+    version = aws_launch_template.node_group.latest_version
+  }
 
   scaling_config {
     min_size     = 2
