@@ -33,5 +33,8 @@ resource "aws_eks_node_group" "node_group" {
     max_unavailable = 1
   }
 
-  tags = var.tags
+  tags = merge(var.tags, {
+    "k8s.io/cluster-autoscaler/enabled"                = "true"
+    "k8s.io/cluster-autoscaler/eks-${var.projectName}" = "owned"
+  })
 }
