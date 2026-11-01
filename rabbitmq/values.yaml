@@ -1,3 +1,6 @@
+image:
+  repository: bitnamilegacy/rabbitmq
+
 auth:
   username: mechanical-hub
   existingPasswordSecret: rabbitmq-secret
@@ -21,6 +24,8 @@ resources:
 
 metrics:
   enabled: true
+  image:
+    repository: bitnamilegacy/rabbitmq-exporter
 
 # As filas, exchanges e bindings NAO sao provisionados aqui.
 # Cada microsservico declara o que precisa (exchange/fila/binding durave)
