@@ -175,7 +175,8 @@ jobs:
             --set node.serviceAccount.create=true
 
       - name: Definir StorageClass gp2 como padrao
-        run: kubectl patch storageclass gp2 -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+        run: |
+          kubectl patch storageclass gp2 -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 
   rabbitmq:
     name: Instalar RabbitMQ
