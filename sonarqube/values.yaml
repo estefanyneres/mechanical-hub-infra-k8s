@@ -1,0 +1,40 @@
+# H2 embutido (ADR-004): sem Postgres/RDS separado.
+postgresql:
+  enabled: false
+
+# PVC ligado -- protege o arquivo do H2 contra reinicio do pod DENTRO da
+# mesma sessao (node trocado pelo Cluster Autoscaler, OOM, helm upgrade
+# futuro). Nao contradiz a ADR-004: ela decide nao persistir ENTRE sessoes,
+# o que continua valendo mesmo assim -- o volume e apagado junto quando o
+# cluster EKS e destruido no fim da sessao (DESTROY=true).
+persistence:
+  enabled: true
+  size: 5Gi
+
+# node t3.medium (4Gi RAM) com 2-5 no autoscaling group; o SonarQube roda
+# web + compute engine + elasticsearch embutido no mesmo pod, por isso o
+# pedido de memoria e maior que o dos outros add-ons (RabbitMQ, Datadog).
+resources:
+  requests:
+    cpu: 500m
+    memory: 2Gi
+  limits:
+    cpu: "1"
+    memory: 3Gi
+
+# NodePort fixo (mesmo padrao do nodePort: 30080 do mechanical-hub em
+# k8s/service.yaml) -- precisa de porta fixa pro target group do ALB do
+# api-gateway alcancar o pod em qualquer node do ASG (ver TASK-009).
+service:
+  type: NodePort
+  externalPort: 9000
+  nodePort: "30900"
+
+ingress:
+  enabled: false
+
+# Roda atras do api-gateway sob o path /sonarqube (TASK-009) -- sem isso o
+# proprio SonarQube nao sabe que as requisicoes chegam com esse prefixo e
+# responde 404 pra tudo.
+sonarProperties:
+  sonar.web.context: /sonarqube
