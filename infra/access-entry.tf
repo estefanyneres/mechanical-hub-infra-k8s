@@ -12,4 +12,6 @@ resource "aws_eks_access_policy_association" "access_entry_association" {
   access_scope {
     type = "cluster"
   }
+
+  depends_on = [aws_eks_access_entry.access_entry]
 }
