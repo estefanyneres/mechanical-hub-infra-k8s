@@ -286,13 +286,13 @@ jobs:
           kubectl -n sonarqube port-forward svc/sonarqube-sonarqube 9000:9000 &
           echo $! > /tmp/port-forward.pid
 
-          for i in $(seq 1 30); do
+          for i in $(seq 1 60); do
             STATUS=$(curl -s http://localhost:9000/sonarqube/api/system/status | jq -r '.status' 2>/dev/null || echo "")
             if [ "$STATUS" = "UP" ]; then
               echo "SonarQube esta UP."
               exit 0
             fi
-            echo "Aguardando SonarQube subir... ($i/30)"
+            echo "Aguardando SonarQube subir... ($i/60)"
             sleep 10
           done
           echo "SonarQube nao ficou UP a tempo."
