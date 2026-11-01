@@ -36,6 +36,9 @@ ingress:
 monitoringPasscodeSecretName: sonarqube-secret
 monitoringPasscodeSecretKey: passcode
 
+community:
+  enabled: true
+
 # Roda atras do api-gateway sob o path /sonarqube (TASK-009) -- sem isso o
 # proprio SonarQube nao sabe que as requisicoes chegam com esse prefixo e
 # responde 404 pra tudo.
