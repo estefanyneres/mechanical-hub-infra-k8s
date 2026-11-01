@@ -212,6 +212,12 @@ jobs:
       - name: Criar namespace sonarqube
         run: kubectl create namespace sonarqube --dry-run=client -o yaml | kubectl apply -f -
 
+      - name: Criar secret com o passcode de monitoramento do SonarQube
+        run: |
+          kubectl -n sonarqube create secret generic sonarqube-secret \
+            --from-literal passcode=${{ secrets.SONAR_MONITORING_PASSCODE }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+
       - name: Instalar ou atualizar o SonarQube via Helm
         run: |
           helm upgrade --install sonarqube sonarqube/sonarqube \
