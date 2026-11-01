@@ -141,3 +141,148 @@ jobs:
           helm upgrade --install cluster-autoscaler autoscaler/cluster-autoscaler \
             --namespace kube-system \
             -f cluster-autoscaler/values.yaml
+
+  rabbitmq:
+    name: Instalar RabbitMQ
+    runs-on: ubuntu-latest
+    needs: [config, terraform]
+    if: needs.config.outputs.destroy == 'false'
+    steps:
+      - name: Checkout do codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar credenciais AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Configurar kubectl
+        run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Instalar Helm
+        uses: azure/setup-helm@v4
+
+      - name: Criar namespace rabbitmq
+        run: kubectl create namespace rabbitmq --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Criar secret com usuario/senha e erlang cookie do RabbitMQ
+        run: |
+          kubectl -n rabbitmq create secret generic rabbitmq-secret \
+            --from-literal password=${{ secrets.RABBITMQ_PASSWORD }} \
+            --from-literal erlang-cookie=${{ secrets.RABBITMQ_ERLANG_COOKIE }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Instalar ou atualizar o RabbitMQ via Helm
+        run: |
+          helm upgrade --install rabbitmq oci://registry-1.docker.io/bitnamicharts/rabbitmq \
+            --namespace rabbitmq \
+            -f rabbitmq/values.yaml
+
+  sonarqube:
+    name: Instalar SonarQube
+    runs-on: ubuntu-latest
+    needs: [config, terraform]
+    if: needs.config.outputs.destroy == 'false'
+    steps:
+      - name: Checkout do codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar credenciais AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Configurar kubectl
+        run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Instalar Helm
+        uses: azure/setup-helm@v4
+
+      - name: Adicionar repositorio Helm do SonarQube
+        run: |
+          helm repo add sonarqube https://SonarSource.github.io/helm-chart-sonarqube
+          helm repo update
+
+      - name: Criar namespace sonarqube
+        run: kubectl create namespace sonarqube --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Instalar ou atualizar o SonarQube via Helm
+        run: |
+          helm upgrade --install sonarqube sonarqube/sonarqube \
+            --namespace sonarqube \
+            -f sonarqube/values.yaml
+
+  sonarqube-bootstrap:
+    name: Gerar token do SonarQube pos-subida
+    runs-on: ubuntu-latest
+    needs: [config, terraform, sonarqube]
+    if: needs.config.outputs.destroy == 'false'
+    steps:
+      - name: Configurar credenciais AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Configurar kubectl
+        run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      # Nao reconfigura Quality Gate: o gate padrao "Sonar way" (ja vem pronto
+      # em qualquer banco H2 novo) ja exige 80% de cobertura no codigo novo,
+      # que foi a opcao escolhida (mais facil de cumprir que cobertura geral,
+      # e evita criar/manter um gate customizado via API).
+      - name: Abrir port-forward pro SonarQube e aguardar ficar pronto
+        run: |
+          # ajustar o nome do service se vier diferente de "sonarqube"
+          # (confirmar com `kubectl -n sonarqube get svc` na primeira aplicacao real)
+          kubectl -n sonarqube port-forward svc/sonarqube 9000:9000 &
+          echo $! > /tmp/port-forward.pid
+
+          for i in $(seq 1 30); do
+            STATUS=$(curl -s http://localhost:9000/sonarqube/api/system/status | jq -r '.status' 2>/dev/null || echo "")
+            if [ "$STATUS" = "UP" ]; then
+              echo "SonarQube esta UP."
+              exit 0
+            fi
+            echo "Aguardando SonarQube subir... ($i/30)"
+            sleep 10
+          done
+          echo "SonarQube nao ficou UP a tempo."
+          exit 1
+
+      - name: Gerar novo token de autenticacao (login padrao admin/admin)
+        run: |
+          TOKEN_NAME="ci-token-$(date +%s)"
+          RESPONSE=$(curl -s -u admin:admin -X POST \
+            "http://localhost:9000/sonarqube/api/user_tokens/generate" \
+            -d "name=${TOKEN_NAME}")
+          TOKEN=$(echo "$RESPONSE" | jq -r '.token')
+
+          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+            echo "Falha ao gerar o token: $RESPONSE"
+            exit 1
+          fi
+
+          {
+            echo "## Token do SonarQube gerado nesta sessao"
+            echo ""
+            echo "Copie este valor manualmente para o secret \`SONAR_TOKEN\` nos 4"
+            echo "repositorios de microsservico (core-service, repair-service,"
+            echo "stock-service, billing-service):"
+            echo ""
+            echo '```'
+            echo "$TOKEN"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Encerrar o port-forward
+        if: always()
+        run: kill "$(cat /tmp/port-forward.pid)" 2>/dev/null || true
