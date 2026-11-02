@@ -281,21 +281,26 @@ jobs:
       # em qualquer banco H2 novo) ja exige 80% de cobertura no codigo novo,
       # que foi a opcao escolhida (mais facil de cumprir que cobertura geral,
       # e evita criar/manter um gate customizado via API).
-      - name: Abrir port-forward pro SonarQube e aguardar ficar pronto
+      - name: Aguardar o pod do SonarQube ficar pronto
+        run: |
+          kubectl -n sonarqube wait --for=condition=ready pod -l app=sonarqube --timeout=900s
+
+      - name: Abrir port-forward pro SonarQube e aguardar responder
         run: |
           kubectl -n sonarqube port-forward svc/sonarqube-sonarqube 9000:9000 &
           echo $! > /tmp/port-forward.pid
+          sleep 3
 
-          for i in $(seq 1 60); do
+          for i in $(seq 1 30); do
             STATUS=$(curl -s http://localhost:9000/sonarqube/api/system/status | jq -r '.status' 2>/dev/null || echo "")
             if [ "$STATUS" = "UP" ]; then
               echo "SonarQube esta UP."
               exit 0
             fi
-            echo "Aguardando SonarQube subir... ($i/60)"
+            echo "Aguardando SonarQube responder... ($i/30)"
             sleep 10
           done
-          echo "SonarQube nao ficou UP a tempo."
+          echo "SonarQube nao respondeu a tempo."
           exit 1
 
       - name: Gerar novo token de autenticacao (login padrao admin/admin)
