@@ -54,12 +54,12 @@ Para derrubar, ordem inversa, com este repo saindo **antes** do `infra-base`.
 
 RFCs e ADRs ficam centralizados no repo da aplicação, para não duplicar/desincronizar entre os 6 repositórios. As diretamente relevantes para este repo:
 
-- [ADR-002 — Descoberta entre repositórios via data source (Fase 3)](https://github.com/estefanyneres/mechanical-hub/blob/main/src/docs/fase3/documentacao/adrs.md)
-- [ADR-003 — Security groups centralizados em `infra-base` (Fase 3)](https://github.com/estefanyneres/mechanical-hub/blob/main/src/docs/fase3/documentacao/adrs.md)
-- [ADR-004 — ALB criado pelo Terraform, Service como NodePort (Fase 3)](https://github.com/estefanyneres/mechanical-hub/blob/main/src/docs/fase3/documentacao/adrs.md)
-- [ADR-006 — HPA e node group como duas camadas de escala; Cluster Autoscaler fora do escopo (Fase 3)](https://github.com/estefanyneres/mechanical-hub/blob/main/src/docs/fase3/documentacao/adrs.md)
-- [ADR-008 — Nodes em subnet pública sem NAT Gateway (Fase 3)](https://github.com/estefanyneres/mechanical-hub/blob/main/src/docs/fase3/documentacao/adrs.md)
-- [ADR-015 — Filtragem deliberada de ruído de observabilidade (Fase 3)](https://github.com/estefanyneres/mechanical-hub/blob/main/src/docs/fase3/documentacao/adrs.md)
+- [ADR-002 — Descoberta entre repositórios via data source (Fase 3)](https://github.com/estefanyneres/mechanical-hub-core-service/blob/main/docs/adrs-fase3.md)
+- [ADR-003 — Security groups centralizados em `infra-base` (Fase 3)](https://github.com/estefanyneres/mechanical-hub-core-service/blob/main/docs/adrs-fase3.md)
+- [ADR-004 — ALB criado pelo Terraform, Service como NodePort (Fase 3)](https://github.com/estefanyneres/mechanical-hub-core-service/blob/main/docs/adrs-fase3.md)
+- [ADR-006 — HPA e node group como duas camadas de escala; Cluster Autoscaler fora do escopo (Fase 3)](https://github.com/estefanyneres/mechanical-hub-core-service/blob/main/docs/adrs-fase3.md)
+- [ADR-008 — Nodes em subnet pública sem NAT Gateway (Fase 3)](https://github.com/estefanyneres/mechanical-hub-core-service/blob/main/docs/adrs-fase3.md)
+- [ADR-015 — Filtragem deliberada de ruído de observabilidade (Fase 3)](https://github.com/estefanyneres/mechanical-hub-core-service/blob/main/docs/adrs-fase3.md)
 - [ADR-002 — RabbitMQ self-hosted no cluster EKS (Fase 4)](https://github.com/estefanyneres/mechanical-hub-core-service/blob/main/docs/adrs.md)
 - [ADR-004 — SonarQube self-hosted, com banco H2 embutido (Fase 4)](https://github.com/estefanyneres/mechanical-hub-core-service/blob/main/docs/adrs.md)
 
