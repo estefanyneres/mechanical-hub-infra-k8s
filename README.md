@@ -102,37 +102,3 @@ infraestrutura, não tráfego real da aplicação.
   causa dos volumes persistentes). Por fim, `sonarqube-bootstrap` gera um token
   de autenticação novo e publica no resumo do job, pra copiar manualmente nos
   4 repositórios de microsserviço.
-
-## Estrutura
-
-```
-mechanical-hub-infra-k8s/
-├── .github/workflows/
-│   ├── pipeline-infra-feature.yml
-│   └── pipeline-infra-main.yml
-├── cluster-autoscaler/
-│   └── values.yaml
-├── datadog/
-│   └── datadog-values.yaml
-├── rabbitmq/
-│   └── values.yaml
-├── sonarqube/
-│   └── values.yaml
-├── docs/
-│   └── desenhos/
-│       ├── mechanical-hub-infraestrutura-fase-03.jpg
-│       ├── mechanical-hub-infraestrutura-fase-04.jpg
-│       ├── mechanical-hub-apply-destroy-repos-fase-03.jpg
-│       └── mechanical-hub-apply-destroy-repos-fase-04.png
-├── infra/
-│   ├── providers.tf
-│   ├── variables.tf
-│   ├── data.tf
-│   ├── eks.tf
-│   ├── access-entry.tf
-│   ├── sg_rules.tf
-│   ├── outputs.tf
-│   └── pipeline.conf
-├── .gitignore
-└── README.md
-```
