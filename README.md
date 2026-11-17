@@ -25,7 +25,7 @@ groups `app`, `rds` e `alb` via data source). Ordem completa: **infra-base →
 infra-k8s → infra-database → auth-lambda → api-gateway** → `mechanical-hub` (app).
 Para derrubar, ordem inversa, com este repo saindo **antes** do `infra-base`.
 
-![Ordem de apply e destroy entre os repositórios](docs/desenhos/mechanical-hub-apply-destroy-repos-fase-03.jpg)
+![Ordem de apply e destroy entre os repositórios](docs/desenhos/mechanical-hub-apply-destroy-repos-fase-04.png)
 
 1. Configurar no repositório os secrets `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`,
    `AWS_SESSION_TOKEN`, `AWS_ACCOUNT_ID`, `DD_API_KEY`, `RABBITMQ_PASSWORD`,
@@ -121,7 +121,8 @@ mechanical-hub-infra-k8s/
 ├── docs/
 │   └── desenhos/
 │       ├── mechanical-hub-infraestrutura-fase-03.jpg
-│       └── mechanical-hub-apply-destroy-repos-fase-03.jpg
+│       ├── mechanical-hub-apply-destroy-repos-fase-03.jpg
+│       └── mechanical-hub-apply-destroy-repos-fase-04.png
 ├── infra/
 │   ├── providers.tf
 │   ├── variables.tf
