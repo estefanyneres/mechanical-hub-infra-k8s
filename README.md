@@ -16,7 +16,7 @@ Driver, RabbitMQ e SonarQube (Fase 4).
 
 ## Diagrama de arquitetura
 
-![Infraestrutura AWS - Fase 3](docs/desenhos/mechanical-hub-infraestrutura-fase-03.jpg)
+![Infraestrutura AWS - Fase 3](docs/desenhos/mechanical-hub-infraestrutura-fase-04.jpg)
 
 ## Passos para execução e deploy
 
@@ -25,7 +25,7 @@ groups `app`, `rds` e `alb` via data source). Ordem completa: **infra-base →
 infra-k8s → infra-database → auth-lambda → api-gateway** → `mechanical-hub` (app).
 Para derrubar, ordem inversa, com este repo saindo **antes** do `infra-base`.
 
-![Ordem de apply e destroy entre os repositórios](docs/desenhos/mechanical-hub-apply-destroy-repos-fase-03.jpg)
+![Ordem de apply e destroy entre os repositórios](docs/desenhos/mechanical-hub-apply-destroy-repos-fase-04.png)
 
 1. Configurar no repositório os secrets `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`,
    `AWS_SESSION_TOKEN`, `AWS_ACCOUNT_ID`, `DD_API_KEY`, `RABBITMQ_PASSWORD`,
@@ -54,12 +54,14 @@ Para derrubar, ordem inversa, com este repo saindo **antes** do `infra-base`.
 
 RFCs e ADRs ficam centralizados no repo da aplicação, para não duplicar/desincronizar entre os 6 repositórios. As diretamente relevantes para este repo:
 
-- [ADR-002 — Descoberta entre repositórios via data source](https://github.com/estefanyneres/mechanical-hub/blob/main/src/docs/fase3/documentacao/adrs.md)
-- [ADR-003 — Security groups centralizados em `infra-base`](https://github.com/estefanyneres/mechanical-hub/blob/main/src/docs/fase3/documentacao/adrs.md)
-- [ADR-004 — ALB criado pelo Terraform, Service como NodePort](https://github.com/estefanyneres/mechanical-hub/blob/main/src/docs/fase3/documentacao/adrs.md)
-- [ADR-006 — HPA e node group como duas camadas de escala; Cluster Autoscaler fora do escopo](https://github.com/estefanyneres/mechanical-hub/blob/main/src/docs/fase3/documentacao/adrs.md)
-- [ADR-008 — Nodes em subnet pública sem NAT Gateway](https://github.com/estefanyneres/mechanical-hub/blob/main/src/docs/fase3/documentacao/adrs.md)
-- [ADR-015 — Filtragem deliberada de ruído de observabilidade](https://github.com/estefanyneres/mechanical-hub/blob/main/src/docs/fase3/documentacao/adrs.md)
+- [ADR-002 — Descoberta entre repositórios via data source (Fase 3)](https://github.com/estefanyneres/mechanical-hub-core-service/blob/main/docs/adrs-fase3.md)
+- [ADR-003 — Security groups centralizados em `infra-base` (Fase 3)](https://github.com/estefanyneres/mechanical-hub-core-service/blob/main/docs/adrs-fase3.md)
+- [ADR-004 — ALB criado pelo Terraform, Service como NodePort (Fase 3)](https://github.com/estefanyneres/mechanical-hub-core-service/blob/main/docs/adrs-fase3.md)
+- [ADR-006 — HPA e node group como duas camadas de escala; Cluster Autoscaler fora do escopo (Fase 3)](https://github.com/estefanyneres/mechanical-hub-core-service/blob/main/docs/adrs-fase3.md)
+- [ADR-008 — Nodes em subnet pública sem NAT Gateway (Fase 3)](https://github.com/estefanyneres/mechanical-hub-core-service/blob/main/docs/adrs-fase3.md)
+- [ADR-015 — Filtragem deliberada de ruído de observabilidade (Fase 3)](https://github.com/estefanyneres/mechanical-hub-core-service/blob/main/docs/adrs-fase3.md)
+- [ADR-002 — RabbitMQ self-hosted no cluster EKS (Fase 4)](https://github.com/estefanyneres/mechanical-hub-core-service/blob/main/docs/adrs.md)
+- [ADR-004 — SonarQube self-hosted, com banco H2 embutido (Fase 4)](https://github.com/estefanyneres/mechanical-hub-core-service/blob/main/docs/adrs.md)
 
 ## Regras de segurança criadas aqui (consumidor do `infra-base`)
 
@@ -100,35 +102,3 @@ infraestrutura, não tráfego real da aplicação.
   causa dos volumes persistentes). Por fim, `sonarqube-bootstrap` gera um token
   de autenticação novo e publica no resumo do job, pra copiar manualmente nos
   4 repositórios de microsserviço.
-
-## Estrutura
-
-```
-mechanical-hub-infra-k8s/
-├── .github/workflows/
-│   ├── pipeline-infra-feature.yml
-│   └── pipeline-infra-main.yml
-├── cluster-autoscaler/
-│   └── values.yaml
-├── datadog/
-│   └── datadog-values.yaml
-├── rabbitmq/
-│   └── values.yaml
-├── sonarqube/
-│   └── values.yaml
-├── docs/
-│   └── desenhos/
-│       ├── mechanical-hub-infraestrutura-fase-03.jpg
-│       └── mechanical-hub-apply-destroy-repos-fase-03.jpg
-├── infra/
-│   ├── providers.tf
-│   ├── variables.tf
-│   ├── data.tf
-│   ├── eks.tf
-│   ├── access-entry.tf
-│   ├── sg_rules.tf
-│   ├── outputs.tf
-│   └── pipeline.conf
-├── .gitignore
-└── README.md
-```
